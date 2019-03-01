@@ -30,6 +30,7 @@ public:
 		for(int i = 0; i<length; i++)
 		{
 			random = rand() % (end-beginning) + beginning;
+			cout << random << endl;
 			addRequest(random);
 		}
 		
@@ -46,7 +47,7 @@ public:
 				j=beginning;
 				//end_condition = end_condition + beginning;
 			}
-
+			cout << j << endl;
 			addRequest(j);
 		}
 	}
@@ -84,7 +85,21 @@ public:
 		}
 	}
 
-
+	void printValues()
+	{
+		int out;
+		cout << "\nPrinting values in process" << endl;
+		out = beginning;
+		cout << out << endl;
+		out = end;
+		cout << out << endl;
+		out = length;
+		cout << out << endl;
+		out = requestsGenerator;
+		cout << out << endl;
+		out = interleavingGenerator;
+		cout << out   << endl;
+	}
 
 	int getBeginning(){
 		return beginning;
@@ -110,118 +125,207 @@ public:
 		string gen;
 		if(requestsGenerator==1)
 		{
-			gen = "sequential";
+			gen = "random";
 		}
 		else
 		{
-			gen = "random";
+			gen = "sequential";
 		}
 		
 		cout<< length << " " << gen << " integers between " << beginning << " and " << end << endl;
-		for(int i=0; i<length;i++)
+		for(int i=0; i<5;i++)
 		{
 			cout << process[i];
+			
 			if(i<(length-1))
 			{
 				cout << ", ";
 			}
+			
 		}
 	}
 
+	void writeFileProcess(){
+		int data;
+		ofstream outfile;
+		outfile.open("trace-3-.");
 
-/*
-    vector<vector<string> > readFile(){
-		vector<vector<string> > data;
-        ifstream infile("input.txt");
+		cout << "Writing to the file" << endl;
+		
+		for(int i = 0; i < length; i++)
+		{
+			data = process[i];
+			outfile << data << endl;
+			//outfile << "," << endl;
+		}
 
-        while(infile)
-        {
-            string s;
-            if(!getline(infile, s)) break;
+		outfile.close();
+	}
 
-            istringstream ss(s);
-            vector<string> record;
 
-            while(ss)
-            {
-                string s;
-                if(!getline(ss,s,',')) break;
-                record.push_back(s);
-            }
 
-            data.push_back(record);
-        }
-
-        if(!infile.eof())
-        {
-            cerr << "Fooey!\n";
-        }
-
-        return data;
-    }
-*/
 	
 };
 
 ////////////////////////////////////////
 
+class FileIO{
+	int beginning, end, length, requestsGenerator, interleavingGenerator;
+	vector<Process> make_process;
 
+public:
+	FileIO(){
+		
+	}
+
+	void readFile(){
+		beginning = 0;
+		end = 0;
+		length = 0;
+		requestsGenerator = 0;
+		interleavingGenerator = 0;
+		
+		string line;
+		ifstream myfile("input.txt");
+		if(myfile.is_open())
+		{
+			while(getline(myfile,line))
+			{
+				//cout<<line<<'\n';
+				vector<int> vect;
+
+
+				stringstream ss(line);
+
+				int i;
+
+				while (ss >> i)
+				{
+					vect.push_back(i);
+
+					if(ss.peek() == ',')ss.ignore();
+					
+				}
+
+				for(i=0;i<vect.size();i++)
+				{
+					//cout<< "integer: " << i << endl;
+					//cout << vect.at(i) << endl;
+
+					if(i==0)
+						beginning = vect.at(i);
+
+					if(i==1)
+						end = vect.at(i);
+
+					if(i==2)
+						length = vect.at(i);
+
+					if(i==3)
+						requestsGenerator = vect.at(i);
+
+					if(i==4)
+						interleavingGenerator = vect.at(i);
+
+					/*
+					beginning = std::stoi(beginning, nullptr);
+					end = std::stoi(end, nullptr);
+					length = std::stoi(length, nullptr);
+					requestsGenerator = std::stoi(requestsGenerator, nullptr);
+					interleavingGenerator = std::stoi(interleavingGenerator, nullptr);
+					*/
+					
+				
+				}
+
+				make_process.push_back(Process(beginning,end,length,requestsGenerator,interleavingGenerator));
+				/*
+				cout<<"FileIO check on values:"<<endl;
+				cout << beginning << endl;
+				cout << end << endl;
+				cout << length<< endl;
+				cout << requestsGenerator << endl;
+				cout << interleavingGenerator << endl;
+				*/
+					
+					
+			}
+			myfile.close();
+		}
+
+		else cout << "Unable to open file";
+
+	}
+
+	//request process object by order of when it was created
+	Process return_input(int i){
+		return make_process[i];
+	}
+
+	
+
+
+	//time to write file
+	void writeFile()
+	{
+		char data[100];
+		ofstream outfile;
+		outfile.open("trace-3-.");
+
+		cout << "Writing to the file" << endl;
+		cout << "Enter your name: ";
+		cin.getline(data,100);
+
+		outfile << data << endl;
+
+		cout << "Enter your age: ";
+		cin >> data;
+		cin.ignore();
+
+		outfile << data << endl;
+
+		outfile.close();
+
+
+	}
+
+	
+
+};
 
 //////////////////////////////////////////////////
 int main(int argc, char** argv) {
-	//std::cout<<"Hello, World!"<<endl;
+	std::cout<<"Hello, World!"<<endl;
 
+	FileIO f1;
+	f1.readFile();
+	//f1.writeFile();
+	//f1.return_process(0).printValues();
+
+
+
+
+/*
 	Process p1(5,100,30,1,1);
 	Process p2(50,200,20,1,1);
 	Process p3(10,100,50,1,1);
-
-	
-
-	if(p1.getRequestsGen()==1)
+*/
+	if(f1.return_input(0).getRequestsGen()==1)
 	{
-		p1.sequentialGenerator();
-		p2.sequentialGenerator();
-		p3.sequentialGenerator();
+		cout << "\nRandom Generator selected" << endl;
+		f1.return_input(0).randomGenerator();
 	}
-	
-	
-	else if(p1.getRequestsGen()==2)
+
+	else if(f1.return_input(0).getRequestsGen()==2)
 	{
-		p1.randomGenerator();
-		p2.randomGenerator();
-		p3.randomGenerator();
-	}
-	
-
-
-
-	cout << "\nPrinting Process 1 of ";
-	p1.printProcess();
-	cout << "\n\nPrinting Process 2 of ";
-	p2.printProcess();
-	cout << "\n\nPrinting Process 3 of ";
-	p3.printProcess();
-
-	if(p1.getInterleavingGen() == 1)
-	{
-		cout << "\nSequential Interleaved Process:\n";
-		p1.interleavingSequential();
-		p2.interleavingSequential();
-		p3.interleavingSequential();
+		cout << "\nSequential Generator selected" << endl;
+		f1.return_input(0).sequentialGenerator();
 	}
 
-	else if(p1.getInterleavingGen()==2)
-	{
-		cout << "\nRandom Interleaved Process:\n";
-		p1.interleavingRandom();
-		p2.interleavingRandom();
-		p3.interleavingRandom();
-	}
 
-	else{
-		cout << "\nChosen interleaved option is unavailable.\n";
-	}
-	
+	//cout << "\nPrinting Process 1 of ";
+	f1.return_input(0).writeFileProcess();
+
 
 
 	return 0;
